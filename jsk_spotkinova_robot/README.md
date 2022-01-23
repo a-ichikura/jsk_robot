@@ -62,10 +62,52 @@ Please see additional config ( e.g. authentification config for Spot ) for [jsk_
 2. Switch on kinova.
 3. Please run the ros driver and other basic programs with `spotkinova_bringup.launch`.
 
+Do not forget connecting to Spot Wi-Fi, (network name is "Belka")
+
+```bash
+rossetip
+rossetmaster belka.local
+```
+*This network is unstable.*
+
+And source spotkinova workspace.
+
 ```bash
 source ~/spotkinova_ws/devel/setup.bash
 roslaunch jsk_spotkinova_startup spotkinova_bringup.launch
 ```
+### How to dock / undock spot
+
+To undock, use the controller or
+
+```
+rosservice call /spot/undock
+```
+
+To dock, move spot besides the dock at first and
+
+```
+rosservice call /spot/dock "dock_id:[id]
+````
+
+### When Ros cannot connect to Belka
+
+1. ssh belka.local
+2. check the log
+
+```bash
+ssh spot@belka.local
+[password]
+sudo journalctl -u jsk-spotkinova-ros-bringup.service
+```
+
+3. stop and restart rosbringup.service
+
+```bash
+sudo systemctl stop jsk-spotkinova-ros-bringup.service
+sudo systemctl start jsk-spotkinova-ros-bringup.service
+```
+
 
 ### How to control spotkinova from roseus
 
@@ -75,6 +117,13 @@ Please start roseus and type as follows.
 ```
 (load "package://spotkinovaeus/spotkinova-interface.l")
 (spotkinova-init)
+```
+
+If you want to simulate without real interface,
+
+```
+(load "package://spotkinovaeus/spotkinova.l")
+(spotkinova)
 ```
 
 Below is a list of typical posture commands for kinova.
@@ -97,26 +146,33 @@ If you want to send an angle-vector to kinova, you need to send the joint angles
 The first 12 dimensions are for spot, but they will be ignored and the last 6 dimensions will be sent to kinova only.
 ```
 (send *ri* :angle-vector #f(0.0 0.0 45.0 0.0 0.0 45.0 0.0 0.0 90.0 0.0 0.0 90.0 0.0 15.0 180.0 -130.0 0.0 55.0 90.0))
+
 ```
-To move the gripper 50 [mm] up, you can use `move-end-pos` method.
+### Controll the full body
+
+To change the full body pose, You can use `body-pose` method.
 ```
-(send *spotkinova* :head :move-end-pos #f(0 0 -50))
+(send *ri* :body-pose '(0 0.2 0))
+(send *ri* :body-pose '(0 -0.2 0))
+(send *ri* :body-pose '(0 0 0.2))
+(send *ri* :body-pose '(0 0 -0.2))
+(send *ri* :body-pose '(0.1 0 0))
+(send *ri* :body-pose '(-0.1 0 0))
 ```
-You can also use `move-end-rot` method to turn the gripper.
+To move the full body back and forwad, You can use `go-pos` method.
+(x[m] y[m] z[degree])
 ```
-(send *spotkinova* :head :move-end-rot -90 :z)
-```
-You can use `inverse-kinematics` to move arm.
-```
-(send *spotkinova* :head :inverse-kinematics (make-coords :pos #f(700 0 500) :rotation-axis nil))
+(send *ri* :go-pos 1 0 0) ;; 1m forward
+(send *ri* :go-pos 0 1 0) ;; 1m move left
+(send *ri* :go-pos 0 0 90) ;; rotate 90 degree
 ```
 You can use `body-inverse-kinematics` to move body.
 ```
 (dotimes (i 100)
-  (send *spot* :body-inverse-kinematics
+  (send *spotkinova* :body-inverse-kinematics
         (make-coords :pos (float-vector 0 0 (* 20 (sin (* pi i 0.02))))
                      :rpy (float-vector (* 0.2 (sin (* pi i 0.02))) (* 0.2 (sin (* pi i 0.02))) (* 0.2 (sin (* pi i 0.02))))
-  (send *ri* :body-pose (send *spot* :copy-worldcoords)) ;; when sending to real robot
+  (send *ri* :body-pose (send *spotkinova* :copy-worldcoords)) ;; when sending to real robot
   )
 ```
 You can use `fullbody-inverse-kinematics` to move arm and body.
@@ -134,4 +190,31 @@ Arm servo turns off because of large joint torque error.
 ```
 (send *ri* :body-pose (send *spotkinova* :copy-worldcoords)) ;; for spot posture
 (send *ri* :angle-vector (send *spotkinova* :angle-vector) 5000) ;; for kinova
+```
+
+### Control the kinova part
+
+*Regards to spotkinova robot, kinova is "head". (not arm)*
+
+To move the gripper 50 [mm] up, you can use `move-end-pos` method.
+```
+(send *spotkinova* :head :move-end-pos #f(0 0 -50))
+```
+To grasp and release with kinova, 
+```
+send *ri* :start-grasp 
+send *ri* :stop-grasp
+```
+And control grasp grasp force, (range [-0.05 ~ 0.95])
+```
+send *ri* :go-grasp-lite :pos 0.5
+```
+
+You can also use `move-end-rot` method to turn the gripper.
+```
+(send *spotkinova* :head :move-end-rot -90 :z)
+```
+You can use `inverse-kinematics` to move arm.
+```
+(send *spotkinova* :head :inverse-kinematics (make-coords :pos #f(700 0 500) :rotation-axis nil))
 ```
