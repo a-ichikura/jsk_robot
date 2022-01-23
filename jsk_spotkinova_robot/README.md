@@ -76,6 +76,7 @@ And source spotkinova workspace.
 source ~/spotkinova_ws/devel/setup.bash
 roslaunch jsk_spotkinova_startup spotkinova_bringup.launch
 ```
+
 ### How to dock / undock spot
 
 To undock, use the controller or
@@ -108,6 +109,10 @@ sudo systemctl stop jsk-spotkinova-ros-bringup.service
 sudo systemctl start jsk-spotkinova-ros-bringup.service
 ```
 
+*Spot interface can be controlled by the exclusive tablet.
+The tablet has higher priority to control than the ROS interface.
+If you hijack with the tablet, release at first and reconnect with ROS.*
+
 
 ### How to control spotkinova from roseus
 
@@ -118,6 +123,12 @@ Please start roseus and type as follows.
 (load "package://spotkinovaeus/spotkinova-interface.l")
 (spotkinova-init)
 ```
+*This is a robot interface class for using spot + kinova.                    
+This class is designed to be able to call both the methods defined in spot-interface and kinova-inte\
+rface.
+The following is priority when calling methods of the same name defined in different classes.        
+1. spotkinova-interface 2. robot-interface 3. spot-interface 4. kinova-interface                     
+Please see the following [page](https://github.com/euslisp/EusLisp/issues/454#issuecomment-863136824)*
 
 If you want to simulate without real interface,
 
