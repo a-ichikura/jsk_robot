@@ -123,12 +123,13 @@ Please start roseus and type as follows.
 (load "package://spotkinovaeus/spotkinova-interface.l")
 (spotkinova-init)
 ```
-*This is a robot interface class for using spot + kinova.                    
+This is a robot interface class for using spot + kinova.                    
 This class is designed to be able to call both the methods defined in spot-interface and kinova-inte\
 rface.
 The following is priority when calling methods of the same name defined in different classes.        
 1. spotkinova-interface 2. robot-interface 3. spot-interface 4. kinova-interface                     
-Please see the following [page](https://github.com/euslisp/EusLisp/issues/454#issuecomment-863136824)*
+Please see the following [page](https://github.com/euslisp/EusLisp/issues/454#issuecomment-863136824)
+
 
 If you want to simulate without real interface,
 
@@ -159,7 +160,7 @@ The first 12 dimensions are for spot, but they will be ignored and the last 6 di
 (send *ri* :angle-vector #f(0.0 0.0 45.0 0.0 0.0 45.0 0.0 0.0 90.0 0.0 0.0 90.0 0.0 15.0 180.0 -130.0 0.0 55.0 90.0))
 
 ```
-### Controll the full body
+### Control the full body
 
 To change the full body pose, You can use `body-pose` method.
 ```
@@ -213,12 +214,12 @@ To move the gripper 50 [mm] up, you can use `move-end-pos` method.
 ```
 To grasp and release with kinova, 
 ```
-send *ri* :start-grasp 
-send *ri* :stop-grasp
+(send *ri* :start-grasp) 
+(send *ri* :stop-grasp)
 ```
-And control grasp grasp force, (range [-0.05 ~ 0.95])
+And control grasp force, (range [-0.05 ~ 0.95])
 ```
-send *ri* :go-grasp-lite :pos 0.5
+(send *ri* :go-grasp-lite :pos 0.5)
 ```
 
 You can also use `move-end-rot` method to turn the gripper.
@@ -229,3 +230,33 @@ You can use `inverse-kinematics` to move arm.
 ```
 (send *spotkinova* :head :inverse-kinematics (make-coords :pos #f(700 0 500) :rotation-axis nil))
 ```
+
+### How to use spotkinova's camera
+
+There are some comera types.
+
+1. Spot (ex. /spot/camera/frontleft/image) ;; This image is monochrome.
+2. Kinova (ex. /kinova_wrist_camera/color/image_raw) ;; This image is RGB color, but the initial image is upside down.
+3. 360 degree camera (ex. /dual_fisheye_to_panorama/output_mouse_left) ;; This image is RGB color and 360 degree.
+
+[HSI color filter](https://jsk-docs.readthedocs.io/projects/jsk_recognition/en/latest/jsk_pcl_ros/nodes/hsi_color_filter.html) can be used with spotkinova's camera.
+
+*This process is only for RGB color camera, so spot camera itself cannot use this filter.*
+
+[Coral USB](https://github.com/knorth55/coral_usb_ros.git) is plugged into the Spotkinova's internel PC, so you can use it with spotkinova's camera.
+
+*This process needs ssh*
+
+```bash
+ssh ichikura@belka.local
+[password]
+source /opt/ros/melodic/setup.bash
+source /home/spot/spot_coral_ws/devel/setup.bash
+rossetip
+rossetmaster belka.local
+roslaunch coral_usb edgetpu_object_detector.launch INPUT_IMAGE:=/kinova_wrist_camera/color/image_raw
+```
+
+If you want to pointclouds in combination with Coral USB, use the aligned topic (/kinova_wrist_camera/aligned_depth_to_color/image_raw)
+because the resolution of kinova's RGB camera and depth camera do not match.
+For more details, see this [issue](https://github.com/HiroIshida/snippets/issues/29).
