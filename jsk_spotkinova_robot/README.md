@@ -162,7 +162,7 @@ The first 12 dimensions are for spot, but they will be ignored and the last 6 di
 ```
 ### Control the full body
 
-To change the full body pose, You can use `body-pose` method.
+To change the full body pose, you can use `body-pose` method with rpy list or coords variable.
 ```
 (send *ri* :body-pose '(0 0.2 0))
 (send *ri* :body-pose '(0 -0.2 0))
@@ -170,6 +170,7 @@ To change the full body pose, You can use `body-pose` method.
 (send *ri* :body-pose '(0 0 -0.2))
 (send *ri* :body-pose '(0.1 0 0))
 (send *ri* :body-pose '(-0.1 0 0))
+(send *ri* :body-pose (make-coords :pos #f(0 0 50) :rpy #f(0.1 0 0)))
 ```
 To move the full body back and forwad, You can use `go-pos` method.
 (x[m] y[m] z[degree])
