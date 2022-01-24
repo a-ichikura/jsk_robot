@@ -248,10 +248,10 @@ There are some comera types.
 *This process needs ssh*
 
 ```bash
-ssh ichikura@belka.local
+ssh spot@belka.local
 [password]
 source /opt/ros/melodic/setup.bash
-source /home/spot/spot_coral_ws/devel/setup.bash
+source $HOME/spot_coral_ws/devel/setup.bash
 rossetip
 rossetmaster belka.local
 roslaunch coral_usb edgetpu_object_detector.launch INPUT_IMAGE:=/kinova_wrist_camera/color/image_raw
