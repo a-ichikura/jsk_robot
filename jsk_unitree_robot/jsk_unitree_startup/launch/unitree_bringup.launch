@@ -33,6 +33,10 @@
 
   <include file="$(find app_manager)/launch/app_manager.launch" />
 
+  <include file="$(find respeaker_ros)/launch/sample_respeaker.launch" >
+    <arg name="language" value="ja-JP" />
+  </include>
+
   <!-- let people to know unitree is bringup -->
   <node pkg="jsk_unitree_startup" type="wakeup.l"
         name="wakeup" output="log" />
