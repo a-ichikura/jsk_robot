@@ -5,6 +5,7 @@ import rospy
 from std_msgs.msg import String
 from speech_recognition_msgs.msg import SpeechRecognitionCandidates
 from jsk_recognition_msgs.msg import PeoplePoseArray
+from dialogflow_task_executive.msg import DialogResponse
 import time
 import message_filters
 
@@ -19,6 +20,7 @@ class testNode():
         # Subscriber
         self.sub1 = rospy.Subscriber('/speech_to_text', SpeechRecognitionCandidates, self.speech_callback)
         self.sub2 = rospy.Subscriber('/people_pose', PeoplePoseArray, callback=self.callback)
+        self.sub3 = rospy.Subscriber('/dialog_response', DialogResponse, callback=self.df_cb)
         self.duration_time = rospy.Duration(30)
         self.prev_pose_detected_time = rospy.Time.now() - self.duration_time
 
@@ -85,6 +87,18 @@ class testNode():
             self.publish(message)
             rospy.sleep(5.0)
 
+    def df_cb(self, data):
+        # TODO to Ichikura, mapping more emotions to more behaviors
+        if data.action == "Happy":
+            self.publish("happy")
+        elif data.action == "Smirking":
+            self.publish("joy")
+        elif data.action == "Love":
+            self.publish("love")
+        elif data.action == "Fearful":
+            self.publish("scared")
+        else:
+            rospy.logwarn("Unknown emotion")
 
 if __name__ == '__main__':
     rospy.init_node('speech_to_emotion')
