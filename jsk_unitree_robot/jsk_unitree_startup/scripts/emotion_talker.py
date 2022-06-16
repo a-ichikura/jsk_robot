@@ -88,15 +88,20 @@ class testNode():
             rospy.sleep(5.0)
 
     def df_cb(self, data):
-        # TODO to Ichikura, mapping more emotions to more behaviors
-        if data.action == "Happy":
+        if data.action == "Happy" or data.action == "input.welcome":
             self.publish("happy")
-        elif data.action == "Smirking":
+        elif data.action == "Smirking" or data.action == "Squinting":
             self.publish("joy")
         elif data.action == "Love":
             self.publish("love")
-        elif data.action == "Fearful":
+        elif data.action == "Fearful" or data.action == "Cry":
             self.publish("scared")
+        elif data.action == "Relived":
+            self.publish("affirmation")
+        elif data.action == "Boring" or data.action == "Unpleasant":
+            self.publish("negation")
+        elif data.action == "Angry" or data.action == "Astonished":
+            self.publish("astonished")
         else:
             rospy.logwarn("Unknown emotion")
 
