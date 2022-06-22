@@ -12,7 +12,7 @@
 (defun happy-pose-2(&optional (time 3000))
   (progn (send *go1* :angle-vector (send *ri* :state :potentio-vector))
 	 (send *go1* :body-pose '(-0.4 -0.4 0.2))
-	 (send *ri* :body-pose '(-0.4 -0.4 0,2))
+	 (send *ri* :body-pose '(-0.4 -0.4 0.2))
 	 ))
 
 (defun reset-pose(&optional (time 3000))

@@ -100,6 +100,8 @@ class testNode():
             self.publish("affirmation")
         elif data.action == "Boring" or data.action == "Unpleasant":
             self.publish("negation")
+        elif data.action == "input.unknown":
+            self.publish("curious")
         elif data.action == "Angry" or data.action == "Astonished":
             self.publish("astonished")
         else:

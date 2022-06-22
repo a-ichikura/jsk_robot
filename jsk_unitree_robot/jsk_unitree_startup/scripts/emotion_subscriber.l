@@ -11,6 +11,8 @@
 (require "package://jsk_unitree_startup/scripts/motions/negation.l")
 (require "package://jsk_unitree_startup/scripts/motions/love.l")
 (require "package://jsk_unitree_startup/scripts/motions/scared.l")
+(require "package://jsk_unitree_startup/scripts/motions/curious.l")
+
 
 (defun emotion-cb(msg)
   (let ((emotion (send msg :data)))
@@ -27,6 +29,8 @@
 	   (love-main))
 	  ((string= emotion "scared")
 	   (scared-main))
+	  ((string= emotion "curious")
+	   (curious-main))
 	  (t
 	   (ros::ros-warn "called unknown emotion ~A" emotion)))
     emotion))
