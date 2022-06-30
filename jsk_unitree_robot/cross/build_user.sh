@@ -54,13 +54,14 @@ docker run -it --rm \
   -v ${PWD}/rosinstall_generator_unreleased.py:/home/user/rosinstall_generator_unreleased.py:ro \
   ros1-unitree:${TARGET_MACHINE} \
   bash -c "\
+    pip install trollius catkin-pkg && \
+    pip install --user virtualenv && \
     source /opt/jsk/System/system_setup.bash && \
     env && \
     set -xeuf -o pipefail && \
     cd /opt/jsk/User && \
     [ ${UPDATE_SOURCE_ROOT} -eq 0 ] || ROS_PACKAGE_PATH=src:\${ROS_PACKAGE_PATH} /home/user/rosinstall_generator_unreleased.py jsk_${TARGET_ROBOT}_startup ${TARGET_ROBOT}eus --rosdistro melodic --exclude RPP --exclude mongodb_store | tee user.repos && \
     [ ${UPDATE_SOURCE_ROOT} -eq 0 -o -z \"\$(cat user.repos)\" ] || PYTHONPATH= vcs import src < user.repos && \
-    catkin build jsk_${TARGET_ROBOT}_startup ${TARGET_ROBOT}eus -s -vi \
-        --cmake-args -DCATKIN_ENABLE_TESTING=FALSE \
+    catkin build jsk_${TARGET_ROBOT}_startup ${TARGET_ROBOT}eus -s -vi    --cmake-args -DCATKIN_ENABLE_TESTING=FALSE \
     " 2>&1 | tee ${TARGET_MACHINE}_build_user.log
 cp ${PWD}/startup_scripts/user_setup.bash ${SOURCE_ROOT}/
