@@ -59,9 +59,9 @@ plugins:
         - /odom
         - /odom_combined
         - /cmd_vel
-        - /move_base/NavFnROS/plan
-        - /move_base/TrajectoryPlannerROS/global_plan
-        - /move_base/TrajectoryPlannerROS/local_plan
+        - /move_base/navigation_plan_viz
+        - /move_base/global_plan_viz
+        - /move_base/local_plan_viz
         - /move_base/global_costmap/footprint
         - /spots_marker_array
         - /spots_pictogram
@@ -75,6 +75,7 @@ plugins:
         - /head_camera/rgb/throttled/image_rect_color/compressed
         - /head_camera/depth_registered/throttled/image_rect/compressedDepth
         - /audio
+        - /rviz/throttled/image/compressed
   - name: result_recorder_plugin
     type: app_recorder/result_recorder_plugin
     plugin_args:
@@ -123,7 +124,9 @@ plugins:
         - name: "/shutdown"
           pkg: std_msgs
           type: Empty
-          cond: timeout
+          cond:
+            - timeout
+            - failure
 plugin_order:
   start_plugin_order:
     - move_base_cancel_plugin
