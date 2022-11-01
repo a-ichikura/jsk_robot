@@ -16,11 +16,13 @@
   (send *spot* :arm :angle-vector #f(0.0 -130.0 120.0 0.0 10.0 0.0))
   (send *ri* :angle-vector (send *spot* :angle-vector) 2000 :default-controller)
   (send *ri* :wait-interpolation)
+  (send *ri* :gripper-open)
   (send *ri* :set-impedance-param :linear-stiffness #f(250 50 50) :rotational-stiffness #f(10 10 30) :linear-damping #f(1.5 1.5 1.5) :rotational-damping #f(0.5 0.5 0.5))
   :started)
 
 (defun end-func (args)
-  (send *ri* :speak "Thank You")  
+  (send *ri* :speak "Thank You")
+  (send *ri* :gripper-close)
   (send *ri* :stow-arm)
   :finished)
 
