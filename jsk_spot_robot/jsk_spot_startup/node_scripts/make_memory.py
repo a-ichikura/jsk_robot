@@ -21,6 +21,8 @@ class Emotion():
         #Subscriber
         self.sub_face = rospy.Subscriber('/aws_detect_faces/attributes', ClassificationResult, callback=self.face_cb)
         self.sub_dif = rospy.Subscriber('/dialogflow_client/text_action/result', DialogTextActionResult, callback=self.dif_cb)
+        ######self.sub_play = rospy.Subscriber("/hogehoge/action/result",)
+        
         ###TODO
         ##
         #self.sub_col = rospy.Subscriber()
@@ -66,12 +68,13 @@ class Emotion():
             pass
 
     def dif_cb(self,data):
-        #print(data)
-        #print(data.result.response.action)
-        #self.publish(str(data.result.response.action))
         emotion = str(data.result.response.action).lower()
         query = str(data.result.response.query)
         self.google_chat_memory(emotion,0,query)
+
+    def play_cb(self,data):
+        status = data
+        self.ball_play(2,status)
 
     def google_chat_memory(self,emotion,service_num,query):
         self.gc_img_cnt = self.gc_img_cnt + 1
@@ -115,13 +118,39 @@ class Emotion():
             cv2.imwrite(memory_path + str(self.gc_img_cnt).zfill(4) + str(sev_num) + str(emo_num) + ".png", cv2_img)
             query = query
             translated = self.translate_message(query)
-            list_ = [self.gc_img_cnt,translated]
+            list_ = ["service_num",self.gc_img_cnt,translated,emotion]
             self.google_chat_list.append(list_)
             all_dict = {"header": self.google_chat_list}
-            with open(memory_path + "translated_deepl_query.json","w") as f:
+            with open(memory_path + "memory.json","w") as f:
                 json.dump(all_dict,f,indent=2)
             rospy.loginfo("Save an image ! to " + memory_path)
 
+    def ball_play_memory(self,service_num,status):
+        self.gc_img_cnt = self.gc_img_cnt + 1
+        today = datetime.date.today()
+        today = str(today)
+        memory_path = "/home/a-ichikura/memory/" + today + "/google_chat_ros/"
+        if not os.path.isdir(memory_path):
+            os.makedirs(memory_path)
+        msg = rospy.wait_for_message(rospy.get_param("~image","/spot/camera/frontright/image"),Image,timeout=None)
+        sev_num = service_num
+
+        rospy.loginfo("save iamges... {}".format(type(msg)))
+        try:
+            cv2_img = self.bridge.imgmsg_to_cv2(msg,"bgr8")
+        except CvBridgeError as e:
+            rospy.logerr("ERROR!!!!!!!!!!!!!!!!!!")
+            rospy.logerr(e)
+        else:
+            cv2.imwrite(memory_path + str(self.gc_img_cnt).zfill(4) + str(sev_num) + str(emo_num) + ".png", cv2_img)
+            list_ = [service_num,self.gc_img_cnt,status,None]
+            self.google_chat_list.append(list_)
+            all_dict = {"header": self.google_chat_list}
+            with open(memory_path + "memory.json","w") as f:
+                json.dump(all_dict,f,indent=2)
+            rospy.loginfo("Save an image ! to " + memory_path)
+
+        
 
     def aws_face_memory(self,emotion,service_num):
         self.aws_img_cnt = self.aws_img_cnt + 1
