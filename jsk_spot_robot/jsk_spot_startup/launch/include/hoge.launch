@@ -1,0 +1,16 @@
+<launch>
+  <node pkg="jsk_spot_startup" type="start-spot2.l" name="start_spot" />
+
+  <arg name="launch_sound_play" default="true" />
+  <!-- english speach node -->
+  <!-- disable sound_play in julius.launch and place it in fetch_bringup.launch -->
+  <!-- see: https://github.com/jsk-ros-pkg/jsk_robot/pull/1140 -->
+  <include file="$(find sound_play)/soundplay_node.launch" />
+
+
+  <!-- japanese speech node -->
+  <!-- <include file="$(find aques_talk)/launch/aques_talk.launch"> -->
+  <!--   <arg name="launch_sound_play" value="$(arg launch_sound_play)" /> -->
+  <!--   <arg name="sound_play_respawn" value="true" /> -->
+  <!-- </include> -->
+</launch>

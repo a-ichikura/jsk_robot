@@ -1,0 +1,46 @@
+<launch>
+  <include file="$(find jsk_spot_startup)/launch/emotion_reaction.launch" />
+  <include file="$(find jsk_spot_startup)/launch/google_chat_ros.launch" />
+  <include file="$(find jsk_spot_startup)/launch/detect_faces.launch" >
+    <arg name="gui" value="false" />
+  </include>
+
+  <include file="$(find jsk_spot_startup)/launch/include/lifelog.launch" />
+  
+  <!-- added by k-okada -->
+  <node name="emotion_logger"
+        pkg="jsk_robot_startup" type="mongo_record.py">
+    <rosparam subst_value="true">
+      topics:
+      - /emotion
+    </rosparam>
+  </node>
+
+  <!-- REDEFINE!!! save only valid date : roslaunch make_memory after lifelog.launch -->
+  <node pkg="jsk_spot_startup" type="publish_valid_attributes.py"
+	name="publish_valid_attributes" />
+  <group ns="lifelog">
+    <node name="face_logger2"
+          pkg="jsk_robot_startup" type="mongo_record.py"
+          >
+      <rosparam subst_value="true">
+        topics:
+        - /aws_auto_checkin_app/class
+        - /aws_detect_faces/attributes
+      </rosparam>
+    </node>
+
+      <node name="rgb_image_logger2"
+            pkg="nodelet" type="nodelet"
+            args="load jsk_robot_lifelog/LightweightLogger /mongodb_record_nodelet_manager"
+            respawn="true">
+        <remap from="~input" to="/aws_detect_faces/image/compressed" />
+        <rosparam subst_value="true">
+          enable_monitor: false
+          monitor_topic: /aws_detect_faces/image/compressed
+          vital_check: true
+        </rosparam>
+      </node>
+
+  </group>
+</launch>

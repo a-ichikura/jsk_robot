@@ -8,6 +8,7 @@
 ;; (send *ri* :set-impedance-param :linear-stiffness #f(250 250 250) :rotational-stiffness #f(30 30 30) :linear-damping #f(1.5 1.5 1.5) :rotational-damping #f(0.5 0.5 0.5))
 ;; (send *ri* :set-impedance-param :linear-stiffness #f(250 25 25) :rotational-stiffness #f(30 5 5) :linear-damping #f(1.5 1.5 1.5) :rotational-damping #f(0.5 0.5 0.5))
 
+
 (defun start-func (args)
   (when (not (eq (send *ri* :state :power-state-shore-power-state) 'off-shore-power))
     (send *ri* :speak "Robot is on dock")
@@ -17,7 +18,8 @@
   (send *ri* :angle-vector (send *spot* :angle-vector) 2000 :default-controller)
   (send *ri* :wait-interpolation)
   (send *ri* :gripper-open)
-  (send *ri* :set-impedance-param :linear-stiffness #f(250 50 50) :rotational-stiffness #f(10 10 30) :linear-damping #f(1.5 1.5 1.5) :rotational-damping #f(0.5 0.5 0.5))
+  ;;(send *ri* :set-impedance-param :linear-stiffness #f(250 50 50) :rotational-stiffness #f(10 10 30) :linear-damping #f(1.5 1.5 1.5) :rotational-damping #f(0.5 0.5 0.5))
+  (send *ri* :set-impedance-param :linear-stiffness #f(250 30 30) :rotational-stiffness #f(10 10 30) :linear-damping #f(1.5 1.0 1.) :rotational-damping #f(0.5 0.5 0.5))
   :started)
 
 (defun end-func (args)
@@ -27,9 +29,10 @@
   :finished)
 
 (defun walk-func (args)
-  (ros::rate 0.1)
+  (ros::rate 2)
   (do-until-key
    (if (null *continue*) (return-from walk-func :finished))
+   (ros::spin-once)
    (ros::sleep))
   :finished)
 ;;
@@ -70,6 +73,15 @@
   (setq *continue* nil))
 (unix:signal unix::sigint 'ros::roseus-sigint-handler)
 
+(ros::subscribe "/joy_dualsense" sensor_msgs::Joy
+		#'(lambda (msg)
+		    ;; (ros::ros-error "~A" msg)
+		    ;; (ros::ros-error "~A" (length (send msg :buttons)))
+		    ;; (ros::ros-error "~A" (elt (send msg :buttons) 11))
+		    (if (and (> (length (send msg :buttons)) 11)
+			     (= (elt (send msg :buttons) 11) 1))
+			(start-func nil)))
+		20)
 ;; state machine
 (exec-state-machine (walk-sm) '((description . "お散歩しました！")(image . "")))
 (exit)

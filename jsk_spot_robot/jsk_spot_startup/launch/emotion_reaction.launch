@@ -1,0 +1,29 @@
+<launch>  
+  <!-- Emotion Reaction -->
+  <arg name="emotion" default="true" doc="set subscribe emotions" />
+  <arg name="image" default="/spot/camera/hand_color/image" doc="set image camera"/>
+  <arg name="memory" default="true" doc="set make memory"/>
+  
+  <!-- emotion_talker.py -->
+  <group if="$(arg emotion)">
+     <node name="emotion_reaction"
+           pkg="jsk_spot_startup" type="emotion_talker.py"
+           output="screen"
+           clear_params="true">
+     </node>
+  </group>
+
+  <!-- make_memory.py -->
+  <group if="$(arg memory)">
+     <node name="make_memory"
+           pkg="jsk_spot_startup" type="make_memory.py"
+           output="screen"
+           clear_params="true">
+       <rosparam subst_value="true">
+         emotion: $(arg emotion)
+         image: $(arg image)
+       </rosparam>
+     </node>
+  </group>
+
+</launch>

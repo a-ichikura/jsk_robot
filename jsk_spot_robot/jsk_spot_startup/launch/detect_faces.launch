@@ -1,0 +1,27 @@
+<launch>  
+  <!-- AWS Detect Face -->
+  <arg name="gui" default="true" doc="set false if you do not want to display window" />
+  <arg name="attributes" default="ALL" doc="set either ALL or DEFAULT for returning attributes"/>
+  <arg name="spot_cam" default="/spot/camera/hand_color/image" doc="set spot camera"/>
+  
+  <!-- <include file="$(find jsk_perception)/sample/include/play_rosbag_people.xml"
+  	   unless="$(arg use_usb_cam)"/> -->
+
+  <!-- aws_detect_faces.py -->
+  <node name="aws_detect_faces"
+        pkg="jsk_perception" type="aws_detect_faces.py"
+        output="screen"
+        clear_params="true">
+    <remap from="image" to="$(arg spot_cam)" />
+    <rosparam subst_value="true">
+      use_window: $(arg gui)
+      aws_credentials_path: /home/a-ichikura/spot_ws/src/jsk_robot/jsk_spot_robot/jsk_spot_startup/config/aws.json
+      always_subscribe: true
+      always_publish: false
+      attributes: $(arg attributes)
+    </rosparam>
+  </node>
+
+
+
+</launch>
