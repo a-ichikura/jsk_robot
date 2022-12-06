@@ -6,6 +6,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from jsk_recognition_msgs.msg import ClassificationResult
 from dialogflow_task_executive.msg import DialogTextActionResult
+from spot_msgs.msg import PickObjectInImageActionResult
 from cv_bridge import CvBridge, CvBridgeError
 import time
 import message_filters
@@ -21,7 +22,8 @@ class Emotion():
         #Subscriber
         self.sub_face = rospy.Subscriber('/aws_detect_faces/attributes', ClassificationResult, callback=self.face_cb)
         self.sub_dif = rospy.Subscriber('/dialogflow_client/text_action/result', DialogTextActionResult, callback=self.dif_cb)
-        ######self.sub_play = rospy.Subscriber("/hogehoge/action/result",)
+        self.sub_play = rospy.Subscriber("/spot/pick_object_in_image/action/result",PickObjectInImageActionResult,self.play_cb)
+        self.sub_play = rospy.Subscriber("/spot/pick_object_in_image/action/goal",PickObjectInImageActionGoal,self.play_start_cb)
         
         ###TODO
         ##
@@ -75,6 +77,10 @@ class Emotion():
     def play_cb(self,data):
         status = data
         self.ball_play(2,status)
+
+    def play_start_cb(self,data):
+        print("do something")
+        self.pick_image_object_image = rospy.wait_for_message(rospy.get_param("~image","/spot/camera/hand_colo/image"),Image,timeout=None)
 
     def google_chat_memory(self,emotion,service_num,query):
         self.gc_img_cnt = self.gc_img_cnt + 1
@@ -135,6 +141,13 @@ class Emotion():
         msg = rospy.wait_for_message(rospy.get_param("~image","/spot/camera/frontright/image"),Image,timeout=None)
         sev_num = service_num
 
+        if status == "true":
+            emo_num = 1
+            emotion = "happy"
+        else:
+            emo_num  = 4
+            emotion = "sad"
+            
         rospy.loginfo("save iamges... {}".format(type(msg)))
         try:
             cv2_img = self.bridge.imgmsg_to_cv2(msg,"bgr8")
@@ -142,8 +155,8 @@ class Emotion():
             rospy.logerr("ERROR!!!!!!!!!!!!!!!!!!")
             rospy.logerr(e)
         else:
-            cv2.imwrite(memory_path + str(self.gc_img_cnt).zfill(4) + str(sev_num) + str(emo_num) + ".png", cv2_img)
-            list_ = [service_num,self.gc_img_cnt,status,None]
+            cv2.imwrite(memory_path + "ball_play" + str(self.gc_img_cnt).zfill(4) + str(sev_num) + str(emo_num) + ".png", cv2_img)
+            list_ = [service_num,self.gc_img_cnt,status,emotion]
             self.google_chat_list.append(list_)
             all_dict = {"header": self.google_chat_list}
             with open(memory_path + "memory.json","w") as f:
